@@ -23,7 +23,7 @@ PROG := Progress
 */
 
 global_variables_setting()
-MainGui := Gui("-Resize", 'Artale_Buff_timer_v1.3.5')
+MainGui := Gui("-Resize", 'Artale_Buff_timer_v1.3.7')
 MainGui.SetFont("s16","微軟正黑體")
 ;Tab := MainGui.Add("Tab3",, ["技能界面", "設定"])
 ;MainGui.BackColor := 0xF0F0F0
@@ -124,7 +124,7 @@ Num_BuffEnd_SE_IAdv1 := MainGui.Add("edit", "vNum_BuffEnd_SE_IAdv1 x+3 yp-3 w60 
 MainGui.Add("UpDown", "vUpDown_BuffEnd_SE_IAdv1 Range0-9999 +0x0080", 0)
 MainGui.Add("Text", "x+5 yp+3", "秒(s)")
 MainGui.Add("Text","xs+12 y+10","類型")
-DDL_BuffEnd_SE_type1 := MainGui.Add("DropDownList", "vDDL_BuffEnd_SE_type1 x+5 yp-5 w95 h270", arr_SE_types)
+DDL_BuffEnd_SE_type1 := MainGui.Add("DropDownList", "vDDL_BuffEnd_SE_type1 x+5 yp-5 w95 h260", arr_SE_types)
 ;PostMessage(0x153, -1, 27, DDL_BuffEnd_SE_type1) ; 設定框框高度
 MainGui.Add("Text","x+10 yp+5","音高")
 DDL_BuffEnd_SE_Pitch1 := MainGui.Add("DropDownList", "vDDL_BuffEnd_SE_Pitch1 x+5 yp-5 w95 h500", arr_pitch_names)
@@ -141,7 +141,7 @@ Num_CD_SE_IAdv1 := MainGui.Add("edit", "vNum_CD_SE_IAdv1 x+3 yp-3 w60 h30 +numbe
 MainGui.Add("UpDown", "vUpDown_CD_SE_IAdv1 Range0-9999 +0x0080", 0)
 MainGui.Add("Text", "x+5 yp+3", "秒(s)")
 MainGui.Add("Text","xs+12 y+10","類型")
-DDL_CD_SE_type1 := MainGui.Add("DropDownList", "vDDL_CD_SE_type1 x+5 yp-5 w95 h500", arr_SE_types)
+DDL_CD_SE_type1 := MainGui.Add("DropDownList", "vDDL_CD_SE_type1 x+5 yp-5 w95 h260", arr_SE_types)
 ;PostMessage(0x153, -1, 27, DDL_CD_SE_type1) ; 設定框框高度
 MainGui.Add("Text","x+10 yp+5","音高")
 DDL_CD_SE_Pitch1 := MainGui.Add("DropDownList", "vDDL_CD_SE_Pitch1 x+5 yp-5 w95 h500", arr_pitch_names)
@@ -771,7 +771,7 @@ global arr_AllKBKeys := Array(
     "non","A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-    ",",".","/",";","'","[","]","-","=","\","``",
+    ",",".","/",";","'","[","]","-","=","\","~",
     "Shift", "Control", "Alt", "Space", 
     "LButton", "RButton", "MButton", "XButton1", "XButton2", 
     "Tab", "Backspace", "Delete", "Insert","Home", "End", "PgUp", "PgDn", 
@@ -2074,7 +2074,7 @@ LV_ItemSelected(GuiCtrlObj, RowIndex, Selected) {
                 CD_SE_wav_selecter_switch(0)
                 DDL_CD_SE_Pitch1.Value := the_row_arr2d_tab1_AllLV_data[10]
             }
-            else if (the_row_arr2d_tab1_AllLV_data[6] == 16 and FileExist(the_row_arr2d_tab1_AllLV_data[10])) {
+            else if (the_row_arr2d_tab1_AllLV_data[9] == 16 and FileExist(the_row_arr2d_tab1_AllLV_data[10])) {
                 CD_SE_wav_selecter_switch(1)
                 arr_selected_wav_file_path[2] := the_row_arr2d_tab1_AllLV_data[10]
                 SplitPath the_row_arr2d_tab1_AllLV_data[10], , , , &file_name
@@ -2428,7 +2428,7 @@ fill_now_buffsetting_to_data_array(ctrl*) {
         }
     }
     ;Bool_CD_SE_Trig1.Value為預設音效
-    if (Bool_CD_SE_Trig1.Value <= 15) {
+    if (DDL_CD_SE_type1.Value <= 15) {
         str_CD_SE_Pitch_temp := DDL_CD_SE_Pitch1.Value
         ;當音效取消勾選清空type為0
         if (Bool_CD_SE_Trig1.Value == 0){
@@ -3670,8 +3670,13 @@ trun_hotkey_ON(hotkeyname,run_func) {
             MsgBox "按鍵 " hotkeyname " 已更新設定為`n" arr_func_index_name[num_run_func_index] " 按鍵`n" arr_func_index_name[num_same_key_func_index] " 功能不再生效"
         }
         else if (num_run_func_index != 1 and num_same_key_func_index < num_run_func_index) {
-            MsgBox "按鍵 " hotkeyname " 已是設定`n" arr_func_index_name[num_same_key_func_index] " 按鍵`n" arr_func_index_name[num_same_key_func_index] " 按鍵設定未生效"
+            MsgBox "按鍵 " hotkeyname " 已是設定`n" arr_func_index_name[num_same_key_func_index] " 按鍵`n" arr_func_index_name[num_run_func_index] " 按鍵設定未生效"
+            return
         }
+    }
+    ;特別將~(儲存到存檔熱鍵)轉換成`(定義按下用熱鍵)避免存檔損壞
+    if(hotkeyname == "~") {
+        hotkeyname := "``"
     }
     try {
         hotkey "*~" hotkeyname,"ON" ;如果可能, 開啟曾被關閉的熱鍵
@@ -3699,6 +3704,10 @@ trun_hotkey_Off(hotkeyname) {
     if(hotkeyname == "" or hotkeyname == "non") {
         return
     }
+    ;特別將~(儲存到存檔熱鍵)轉換成`(定義按下用熱鍵)
+    if(hotkeyname == "~") {
+        hotkeyname := "``"
+    }
     ;查找重複的熱鍵, 遍歷arr2d_tab1_AllLV_data第二欄和全重置HK, 有兩個以上一樣時不取消熱鍵
     for , row in arr2d_tab1_AllLV_data {
         if(row[2] == hotkeyname) {
@@ -3716,6 +3725,9 @@ trun_hotkey_Off(hotkeyname) {
     }
     if(count_x >= 2) {
         return
+    }
+    if(hotkeyname == "~") {
+        hotkeyname := "``"
     }
     try {
         hotkey "*~" hotkeyname,"OFF" ;停用舊的熱鍵
@@ -3735,6 +3747,10 @@ main_start_countdown(presshotkeyname)
     if (arr_tab1_Other_Setting_data[4] == 1 and WinActive(arr_tab1_Other_Setting_data[5]) == 0) {
         ;tooltip arr_tab1_Other_Setting_data[4] ":" WinActive(arr_tab1_Other_Setting_data[5])
         return
+    }
+    ;特別將`(定義熱鍵)轉換回~(儲存熱鍵)用於比較是否被按下
+    if("*~``" == presshotkeyname or "~``" == presshotkeyname or "``" == presshotkeyname) {
+        presshotkeyname := "*~~"
     }
     ;遍歷arr2d_tab1_AllLV_data的熱鍵欄資料
     for count_x, row in arr2d_tab1_AllLV_data {
