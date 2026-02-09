@@ -1,4 +1,7 @@
 # Artale_Buff_timer
+檔案連結：
+
+[(https://github.com/linbearone/Artale_Buff_timer/issues/1)](https://github.com/linbearone/Artale_Buff_timer/issues/1)
 
 簡介：
 
